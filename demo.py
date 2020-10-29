@@ -1,3 +1,4 @@
+from __future__ import barry_as_FLUFL
 import PIL
 from shapely.geometry import polygon
 import jsonlines
@@ -51,6 +52,9 @@ def table(img: dict) -> PIL.Image:
                 draw.rectangle(xxyy, fill='blue', outline=None, )
 
             while lt[-1] != '<td>':
+                if lt[-1] == '<td':
+                    lt.pop()
+                    break
                 lt.pop()
         elif html_label == '</tr>':
             # 解决左上、右下
@@ -76,7 +80,7 @@ def table(img: dict) -> PIL.Image:
         else:
             lt.append(html_label)
 
-    pil_img.show()
+    pil_img.save(f"vis/{img['filename']}")
     return
 
 
