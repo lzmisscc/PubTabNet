@@ -1,3 +1,4 @@
+*.json
 # Byte-compiled / optimized / DLL files
 .vscode/
 __pycache__/
@@ -106,3 +107,4 @@ venv.bak/
 .DS_Store
 examples.tar.gz
 ._examples
+.vscode/settings.json
