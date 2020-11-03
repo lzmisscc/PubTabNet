@@ -37,8 +37,11 @@ def get_text(img: dict, dataset_path: str = "/data/ouyangshizhuang/data/table_ma
     }
 
 
-def main():
+def main(flag='train'):
     data = next(reader)
+    while data['split'] != flag:
+        data = next(reader)
+
     result = get_text(data)
     logging.info(result['filename'])
     index = 0
@@ -47,7 +50,7 @@ def main():
         pre = str(index).zfill(5)
         crop_save_name = result['filename'].replace('.png', f'_{pre}.png')
         crop_txt_save_name = crop_save_name.replace('.png', '.txt')
-        logging.info(crop_txt_save_name)
+        logging.info([result['flag'], crop_txt_save_name])
         with open(os.path.join('dataset', result['flag'], crop_txt_save_name), 'w') as f:
             f.write(text)
         crop_img.save(os.path.join(
@@ -56,5 +59,5 @@ def main():
 
 
 if __name__ == "__main__":
-    for i in range(5000):
-        main()
+    for i in range(100):
+        main('val')
