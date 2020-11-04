@@ -76,7 +76,7 @@ class Point2Coco:
 P2C = Point2Coco()
 images, annotations, categories = [], [], []
 categories += [
-    dict(id='1', name='cell'),
+    dict(id=0, name='cell'),
 ]
 dataset_img_path = "examples/"
 with jsonlines.open('examples/PubTabNet_Examples.jsonl', 'r') as reader:
@@ -100,7 +100,11 @@ for id, img in enumerate(imgs):
             continue
         bbox_id += 1
         point = box['bbox']
-
+        point_xywh = [
+            min(point[0], point[2]), min(point[1], point[3]),
+            max(point[0], point[2])-min(point[0], point[2]),
+            max(point[1], point[3])-min(point[1], point[3]),
+        ]
         annotations.append(
             {
                 # if you have mask labels
@@ -108,7 +112,7 @@ for id, img in enumerate(imgs):
                 'area': P2C._get_area(point),
                 'iscrowd': 0,
                 'image_id': id,
-                'bbox': point,
+                'bbox': point_xywh,
                 'category_id': 0,
                 'id': bbox_id
             },
