@@ -36,7 +36,7 @@ def polygon(img: dict) -> PIL.Image:
 def table(img: dict) -> PIL.Image:
     img_path = os.path.join("examples/", img['filename'])
     pil_img = Image.open(img_path)
-    draw = ImageDraw.Draw(pil_img)
+    draw = ImageDraw.Draw(pil_img, mode="RGBA")
 
     lt = []
     points = img['html']['cells']
@@ -49,7 +49,7 @@ def table(img: dict) -> PIL.Image:
                 tmp.append(point['bbox'])
                 # 绘制蓝色，<td>
                 xxyy = ImagePath.Path(point['bbox']).getbbox()
-                draw.rectangle(xxyy, fill='blue', outline=None, )
+                draw.rectangle(xxyy, fill=(255, 0, 255, 100), outline=None, )
 
             while lt[-1] != '<td>':
                 if lt[-1] == '<td':
