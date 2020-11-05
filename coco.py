@@ -35,6 +35,7 @@ import logging
 from PIL import Image, ImageDraw, ImagePath
 import os
 import numpy as np
+import tqdm
 
 logging.basicConfig(
     level=logging.INFO
@@ -78,13 +79,13 @@ images, annotations, categories = [], [], []
 categories += [
     dict(id=0, name='cell'),
 ]
-dataset_img_path = "examples/"
-with jsonlines.open('examples/PubTabNet_Examples.jsonl', 'r') as reader:
+dataset_img_path = "/home/work/DataSet/pubtabnet/"
+with jsonlines.open('/home/work/DataSet/pubtabnet/PubTabNet_Examples.jsonl', 'r') as reader:
     imgs = list(reader)
 
 
 bbox_id = 0
-for id, img in enumerate(imgs):
+for id, img in tqdm.tqdm(enumerate(imgs)):
     im = Image.open(os.path.join(dataset_img_path, img['filename']))
     W, H = im.size
     images.append(
@@ -125,3 +126,5 @@ with open('table_coco.json', 'w') as f:
         annotations=annotations,
         categories=categories,
     ), f)
+
+logging.info("Finish".center(15, '!'))
