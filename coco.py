@@ -125,3 +125,5 @@ with open('table_coco.json', 'w') as f:
         annotations=annotations,
         categories=categories,
     ), f)
+
+logging.info("Finish".center(15, '!'))
