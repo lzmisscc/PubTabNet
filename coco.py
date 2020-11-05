@@ -35,7 +35,6 @@ import logging
 from PIL import Image, ImageDraw, ImagePath
 import os
 import numpy as np
-import tqdm
 
 logging.basicConfig(
     level=logging.INFO
@@ -85,7 +84,7 @@ with jsonlines.open('/home/work/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r') a
 
 
 bbox_id = 0
-for id, img in tqdm.tqdm(enumerate(imgs)):
+for id, img in enumerate(imgs):
     im = Image.open(os.path.join(dataset_img_path, img['filename']))
     W, H = im.size
     images.append(
