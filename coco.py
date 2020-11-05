@@ -80,7 +80,7 @@ categories += [
     dict(id=0, name='cell'),
 ]
 dataset_img_path = "/home/work/DataSet/pubtabnet/"
-with jsonlines.open('/home/work/DataSet/pubtabnet/PubTabNet_Examples.jsonl', 'r') as reader:
+with jsonlines.open('/home/work/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r') as reader:
     imgs = list(reader)
 
 
