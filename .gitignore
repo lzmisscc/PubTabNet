@@ -114,3 +114,4 @@ dataset/
 .vscode/
 *.list
 imgs/
+nohup.out
