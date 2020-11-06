@@ -59,7 +59,7 @@ def polygon(gt: dict) -> PIL.Image:
     tbody_bbox = [table_W[0], tbody_bbox[1], table_W[1], tbody_bbox[3]]
     draw.rectangle(tbody_bbox, fill=(0, 0, 255, 150))
 
-    pil_img.save(f"vis_thead_tbody/{gt['filename']}")
+    pil_img.save(f"vis_col_row/{gt['filename']}")
     return pil_img
 
 

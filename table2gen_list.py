@@ -49,7 +49,7 @@ def polygon(gt: dict) -> PIL.Image:
                     # table[-1].append([[nums] for _ in range(nums)])
                     table[-1].append([nums])
                 continue
-            elif  index < structure_len and 'rowspan' in structure[index+1]:
+            elif index < structure_len and 'rowspan' in structure[index+1]:
                 # 计算出列的数量
                 nums = re.search(r'[0-9]+', structure[index+1])
                 if nums:
@@ -58,6 +58,9 @@ def polygon(gt: dict) -> PIL.Image:
                 continue
             table[-1].append([1])
     print(*table, sep='\n')
+
+    table = np.array(table, np.int)
+
 #     pil_img.save(f"vis_col_row/{gt['filename']}")
 
 #     return pil_img
