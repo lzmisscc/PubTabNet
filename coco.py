@@ -83,7 +83,7 @@ def main():
     categories += [
         dict(id=0, name='cell'),
     ]
-    dataset_img_path = "/home/work/DataSet/pubtabnet/"
+    dataset_img_path = "/data/liuzhuang/DataSet/pubtabnet/"
 
     logging.info("Start".center(15, "!"))
 
@@ -91,7 +91,7 @@ def main():
         annotations, images = [], []
         bbox_id = 0
         reader = jsonlines.open(
-            '/home/work/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r')
+            '/data/liuzhuang/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r')
 
         for id, img in tqdm.tqdm(enumerate(reader.iter())):
             if flag != img['split']:
@@ -143,7 +143,7 @@ def main():
 
         logging.info(f"Finish {flag}".center(15, '!'))
     pools = []
-    for flag in ['train', ]:
+    for flag in ['train', 'val']:
         pool = Process(target=get_flag, args=(flag, ))
         pools.append(pool)
         pool.start()
