@@ -46,7 +46,8 @@ def polygon(gt: dict) -> PIL.Image:
                 nums = re.search(r'[0-9]+', structure[index+1])
                 if nums:
                     nums = int(nums.group())
-                    table[-1].append([[nums] for _ in range(nums)])
+                    # table[-1].append([[nums] for _ in range(nums)])
+                    table[-1].append([nums])
                 continue
             elif  index < structure_len and 'rowspan' in structure[index+1]:
                 # 计算出列的数量
@@ -57,9 +58,9 @@ def polygon(gt: dict) -> PIL.Image:
                 continue
             table[-1].append([1])
     print(*table, sep='\n')
-    pil_img.save(f"vis_col_row/{gt['filename']}")
+#     pil_img.save(f"vis_col_row/{gt['filename']}")
 
-    return pil_img
+#     return pil_img
 
 
 for index, line in enumerate(reader()):
