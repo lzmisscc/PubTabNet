@@ -28,13 +28,17 @@
 # 'categories': [
 #     {'id': 0, 'name': 'car'},
 # ]
+from multiprocessing import pool
 import json
+from os import read
 import PIL
 import jsonlines
 import logging
 from PIL import Image, ImageDraw, ImagePath
 import os
-import numpy as np
+import tqdm
+from multiprocessing import Process
+
 
 logging.basicConfig(
     level=logging.INFO
@@ -73,57 +77,78 @@ class Point2Coco:
         return a
 
 
-P2C = Point2Coco()
-images, annotations, categories = [], [], []
-categories += [
-    dict(id=0, name='cell'),
-]
-dataset_img_path = "/home/work/DataSet/pubtabnet/"
-with jsonlines.open('/home/work/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r') as reader:
-    imgs = list(reader)
+def main():
+    P2C = Point2Coco()
+    images, annotations, categories = [], [], []
+    categories += [
+        dict(id=0, name='cell'),
+    ]
+    dataset_img_path = "/home/work/DataSet/pubtabnet/"
 
+    logging.info("Start".center(15, "!"))
 
-bbox_id = 0
-for id, img in enumerate(imgs):
-    im = Image.open(os.path.join(dataset_img_path, img['filename']))
-    W, H = im.size
-    images.append(
-        {
-            'file_name': img['filename'],
-            'height': H,
-            'width': W,
-            'id': id,
-        },
-    )
-    for box in img['html']['cells']:
-        if 'bbox' not in box:
-            continue
-        bbox_id += 1
-        point = box['bbox']
-        point_xywh = [
-            min(point[0], point[2]), min(point[1], point[3]),
-            max(point[0], point[2])-min(point[0], point[2]),
-            max(point[1], point[3])-min(point[1], point[3]),
-        ]
-        annotations.append(
-            {
-                # if you have mask labels
-                'segmentation': P2C._get_seg(point),
-                'area': P2C._get_area(point),
-                'iscrowd': 0,
-                'image_id': id,
-                'bbox': point_xywh,
-                'category_id': 0,
-                'id': bbox_id
-            },
-        )
+    def gen_coco(flag: str):
+        annotations, images = [], []
+        bbox_id = 0
+        reader = jsonlines.open(
+            '/home/work/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r')
 
+        for id, img in tqdm.tqdm(enumerate(reader.iter())):
+            if flag != img['split']:
+                continue
+            im = Image.open(os.path.join(
+                dataset_img_path, flag, img['filename']))
+            W, H = im.size
+            # logging.info(f"{id}->{img['filename']}")
+            images.append(
+                {
+                    'file_name': img['filename'],
+                    'height': H,
+                    'width': W,
+                    'id': id,
+                },
+            )
+            for box in img['html']['cells']:
+                if 'bbox' not in box:
+                    continue
+                bbox_id += 1
+                point = box['bbox']
+                point_xywh = [
+                    min(point[0], point[2]), min(point[1], point[3]),
+                    max(point[0], point[2])-min(point[0], point[2]),
+                    max(point[1], point[3])-min(point[1], point[3]),
+                ]
+                annotations.append(
+                    {
+                        # if you have mask labels
+                        'segmentation': P2C._get_seg(point),
+                        'area': P2C._get_area(point),
+                        'iscrowd': 0,
+                        'image_id': id,
+                        'bbox': point_xywh,
+                        'category_id': 0,
+                        'id': bbox_id
+                    },
+                )
+        return annotations, images
 
-with open('table_coco.json', 'w') as f:
-    json.dump(dict(
-        images=images,
-        annotations=annotations,
-        categories=categories,
-    ), f)
+    def get_flag(flag):
+        annotations, images = gen_coco(flag)
+        with open(f'table_json/table_coco_{flag}.json', 'w') as f:
+            json.dump(dict(
+                images=images,
+                annotations=annotations,
+                categories=categories,
+            ), f)
 
-logging.info("Finish".center(15, '!'))
+        logging.info(f"Finish {flag}".center(15, '!'))
+    pools = []
+    for flag in ['train', ]:
+        pool = Process(target=get_flag, args=(flag, ))
+        pools.append(pool)
+        pool.start()
+    for pool in pools:
+        pool.join()
+
+if __name__ == "__main__":
+    main()

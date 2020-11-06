@@ -11,7 +11,7 @@ logging.basicConfig(
 reader = jsonlines.open(
     "/data/ouyangshizhuang/data/table_match/pubtabnet/PubTabNet_2.0.0.jsonl", "r")
 
-reader = iter(reader)
+reader = reader.iter()
 
 
 def get_text(img: dict, dataset_path: str = "/data/ouyangshizhuang/data/table_match/pubtabnet/") -> list:
