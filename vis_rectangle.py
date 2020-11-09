@@ -17,6 +17,14 @@ reader = jsonlines.open(
 reader = reader.iter
 
 
+def fliter_bbox(tmp: list) -> list:
+    xxyy = [
+        min(tmp[0], tmp[2]), min(tmp[1], tmp[3]),
+        max(tmp[0], tmp[2]), max(tmp[1], tmp[3]),
+    ]
+    return xxyy
+
+
 def polygon(img: dict, flag: str = 'train') -> PIL.Image:
 
     img_path = os.path.join(
@@ -28,7 +36,12 @@ def polygon(img: dict, flag: str = 'train') -> PIL.Image:
         if 'bbox' not in point:
             continue
         points.append(point['bbox'])
-        xxyy = ImagePath.Path(point['bbox']).getbbox()
+        # xxyy = ImagePath.Path(point['bbox']).getbbox()
+        tmp = point['bbox']
+        xxyy = [
+            min(tmp[0], tmp[2]), min(tmp[1], tmp[3]),
+            max(tmp[0], tmp[2]), max(tmp[1], tmp[3]),
+        ]
         draw.rectangle(xxyy, fill=None, outline='blue', )
     pil_img.save(f"vis_rectangle/{img['filename']}")
 
