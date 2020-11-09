@@ -38,10 +38,14 @@ def A_B(A, B):
         return min(x1, x2), 0, max(y1, y2), 0
 
 
-def polygon(gt: dict) -> PIL.Image:
-    img_path = os.path.join(data_path, gt['filename'])
-    pil_img_row = Image.open(img_path)
-    pil_img_col = pil_img_row.copy()
+def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
+    cols_bbox = []
+    rows_bbox = []
+
+    if save:
+        img_path = os.path.join(data_path, gt['filename'])
+        pil_img_row = Image.open(img_path)
+        pil_img_col = pil_img_row.copy()
     html = ''.join(gt['html']['structure']['tokens'])
 
     thead = re.findall(r'<thead>(.*?)</thead>', html)
@@ -61,20 +65,31 @@ def polygon(gt: dict) -> PIL.Image:
     table_W, table_H = [table_bbox[0],
                         table_bbox[2]], [table_bbox[1], table_bbox[3]]
     # tr 统计td的数量进行bbox的对齐。
-    draw = ImageDraw.Draw(pil_img_row, mode='RGBA')
+    if save:
+        draw = ImageDraw.Draw(pil_img_row, mode='RGBA')
 
     td_nums = 0
     for tr_line in tr:
         num = len(re.findall(r'<td.*?</td>', tr_line))
-        bbox = get_bbox([i['bbox']
-                         for i in cells[td_nums:td_nums+num] if 'bbox' in i])
+        bbox = [i['bbox']
+         for i in cells[td_nums:td_nums+num] if 'bbox' in i]
+        if not bbox:
+            continue
+        bbox = get_bbox(bbox)
         bbox = [table_W[0], bbox[1], table_W[1], bbox[3]]
-        draw.rectangle(bbox, fill=(0, 255, 0, 150), outline=(255, 0, 255))
+        rows_bbox.append({
+            'bbox': bbox,
+            'category_id': 0,
+        })
+        if save:
+            draw.rectangle(bbox, fill=(0, 255, 0, 150), outline=(255, 0, 255))
         td_nums += num
-    pil_img_row.save(f"vis_row/{gt['filename']}")
+    if save:
+        pil_img_row.save(f"vis_row/{gt['filename']}")
 
     # td 进行投影决定列的宽度。
-    draw = ImageDraw.Draw(pil_img_col, mode='RGBA')
+    if save:
+        draw = ImageDraw.Draw(pil_img_col, mode='RGBA')
 
     td_nums = 0
     bboxes = []
@@ -82,7 +97,8 @@ def polygon(gt: dict) -> PIL.Image:
     for label, bbox in zip(td, cells):
         if 'bbox' in bbox and not re.findall(r'colspan="([0-9]+?)"', label):
             bboxes.append(bbox['bbox'])
-
+    if not bboxes:
+        return None
     cols = [bboxes.pop()]
     while bboxes:
         bbox = bboxes.pop()
@@ -95,13 +111,25 @@ def polygon(gt: dict) -> PIL.Image:
         if not flag:
             cols.append(bbox)
     for bbox in cols:
-        draw.rectangle([bbox[0], table_H[0], bbox[2], table_H[1]],
-                       fill=(0, 255, 255, 150), outline=(0, 0, 255))
+        cols_bbox.append({
+            'bbox': [bbox[0], table_H[0], bbox[2], table_H[1]],
+            'category_id': 0,
+        })
+        if save:
+            draw.rectangle([bbox[0], table_H[0], bbox[2], table_H[1]],
+                           fill=(0, 255, 255, 150), outline=(0, 0, 255))
+    if save:
+        pil_img_col.save(f"vis_col/{gt['filename']}")
 
-    pil_img_col.save(f"vis_col/{gt['filename']}")
+    # if classes == 'row':
+    #     return rows_bbox
+    # else:
+    #     return cols_bbox
+    return rows_bbox + cols_bbox
 
 
-# logging
-for index, line in enumerate(reader()):
-    logging.info(f"{index}\t->{line['filename']}")
-    polygon(line)
+if __name__ == "__main__":
+    # logging
+    for index, line in enumerate(reader()):
+        logging.info(f"{index}\t->{line['filename']}")
+        polygon(line, save=True)

@@ -28,7 +28,7 @@
 # 'categories': [
 #     {'id': 0, 'name': 'car'},
 # ]
-from table2thead_tbody import polygon
+from table2thead_tbody import polygon as thead_tbody
 from coco import main
 from multiprocessing import pool
 import json
@@ -38,7 +38,7 @@ from PIL import Image
 import os
 import tqdm
 from multiprocessing import Process
-
+from table2col_row import polygon as col_row
 
 logging.basicConfig(
     level=logging.INFO
@@ -86,8 +86,8 @@ class COCO:
         self.dataset_img_path = "/data/liuzhuang/DataSet/pubtabnet/"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
-            dict(id=0, name='thead'),
-            dict(id=1, name='tbody'),
+            dict(id=0, name='row'),
+            dict(id=1, name='col'),
         ]
         self.flag = flag
         self.reader = jsonlines.open(
@@ -100,50 +100,47 @@ class COCO:
             bbox_id = 0
 
             for id, img in enumerate(gt):
-                try:
-                    if img['split'] != self.flag:
+                if img['split'] != self.flag:
+                    continue
+                logging.info(f'{id}-->\t{img["filename"]}')
+                im = Image.open(os.path.join(
+                    self.dataset_img_path, self.flag, img['filename']))
+                W, H = im.size
+                self.images.append(
+                    {
+                        'file_name': img['filename'],
+                        'height': H,
+                        'width': W,
+                        'id': id,
+                    },
+                )
+                if len(self.images) > 5000:
+                    break
+                tmp = func(img)
+                if not tmp:
+                    continue
+                for box in func(img):
+                    if 'bbox' not in box:
                         continue
-                    logging.info(f'{id}-->\t{img["filename"]}')
-                    im = Image.open(os.path.join(
-                        self.dataset_img_path, self.flag, img['filename']))
-                    W, H = im.size
-                    self.images.append(
+                    bbox_id += 1
+                    point = box['bbox']
+                    point_xywh = [
+                        min(point[0], point[2]), min(point[1], point[3]),
+                        max(point[0], point[2])-min(point[0], point[2]),
+                        max(point[1], point[3])-min(point[1], point[3]),
+                    ]
+                    self.annotations.append(
                         {
-                            'file_name': img['filename'],
-                            'height': H,
-                            'width': W,
-                            'id': id,
+                            # if you have mask labels
+                            'segmentation': P2C._get_seg(point),
+                            'area': P2C._get_area(point),
+                            'iscrowd': 0,
+                            'image_id': id,
+                            'bbox': point_xywh,
+                            'category_id': box.get('category_id', 0),
+                            'id': bbox_id
                         },
                     )
-                    for box in func(img):
-                        if 'bbox' not in box:
-                            continue
-                        bbox_id += 1
-                        point = box['bbox']
-                        point = [
-                            min(point[0], point[2]), min(point[0], point[2]),
-                            max(point[1], point[3]), max(point[1], point[3]),
-                        ]
-                        point_xywh = [
-                            min(point[0], point[2]), min(point[1], point[3]),
-                            max(point[0], point[2])-min(point[0], point[2]),
-                            max(point[1], point[3])-min(point[1], point[3]),
-                        ]
-                        self.annotations.append(
-                            {
-                                # if you have mask labels
-                                'segmentation': P2C._get_seg(point),
-                                'area': P2C._get_area(point),
-                                'iscrowd': 0,
-                                'image_id': id,
-                                'bbox': point_xywh,
-                                'category_id': box.get('category_id', 0),
-                                'id': bbox_id
-                            },
-                        )
-                except Exception as E:
-                    logging.info(*E.args)
-                    continue
         logging.info("Start".center(15, "!"))
         all_ = self.reader()
         gen_coco(all_)
@@ -151,7 +148,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_json/thead_tbody_coco_{self.flag}.json', 'w') as f:
+        with open(f'table_json/row_coco_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,
@@ -162,4 +159,4 @@ class COCO:
 
 
 if __name__ == "__main__":
-    COCO(flag='train').main(polygon)
+    COCO(flag='val').main(col_row)

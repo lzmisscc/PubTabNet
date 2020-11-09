@@ -16,6 +16,8 @@ reader = jsonlines.open('examples/PubTabNet_Examples.jsonl', 'r').iter
 
 def get_bbox(points: list) -> list:
     # [[], ...,[]] -> [x_min,y_min,x_max,y_max]
+    if not points:
+        return None
     points = np.array(points)
     return list(map(int, [
         np.min(points[:, 0]),
@@ -52,14 +54,19 @@ def polygon(gt: dict, save=False) -> dict:
     # thead
     thead_bbox = get_bbox([i['bbox']
                            for i in cells[0:thead_nums] if 'bbox' in i])
+    if thead_bbox == None:
+        return None
     thead_bbox = [table_W[0], thead_bbox[1], table_W[1], thead_bbox[3]]
     if save:
         draw.rectangle(thead_bbox, fill=(255, 0, 0, 150))
     tbody_bbox = get_bbox(
         [i['bbox'] for i in cells[thead_nums:len(td)] if 'bbox' in i])
+    if tbody_bbox == None:
+        return None
     tbody_bbox = [table_W[0], tbody_bbox[1], table_W[1], tbody_bbox[3]]
     if save:
-        draw.rectangle(tbody_bbox, fill=(0, 0, 255, 150))
+        draw.rectangle(tbody_bbox, fill=(
+            0, 0, 255, 150), outline='blue')
         pil_img.save(f"vis_thead_tbody/{gt['filename']}")
     return [
         {
@@ -77,4 +84,4 @@ def polygon(gt: dict, save=False) -> dict:
 if __name__ == "__main__":
     for index, line in enumerate(reader()):
         logging.info(f"{index}\t->{line['filename']}")
-        polygon(line)
+        polygon(line, save=True)
