@@ -72,6 +72,11 @@ def polygon(gt: dict) -> PIL.Image:
             if index not in cols:
                 cols[index] = []
             x = re.findall(r'colspan="([0-9]+?)"', label)
+            y = re.findall(r'rowspan="([0-9]+?)"', label)
+            if y:
+                logging.info(f'y:{y}')
+            else:
+                y = 0 
             if not x:
                 if 'bbox' in bbox:
                     cols[index].append(bbox['bbox'])
@@ -89,6 +94,4 @@ def polygon(gt: dict) -> PIL.Image:
 
 for index, line in enumerate(reader()):
     logging.info(f"{index}\t->{line['filename']}")
-    if line['filename'] != 'PMC4172848_007_00.png':
-        continue
     polygon(line)
