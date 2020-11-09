@@ -25,10 +25,11 @@ def get_bbox(points: list) -> list:
     ]))
 
 
-def polygon(gt: dict) -> PIL.Image:
-    img_path = os.path.join("examples/", gt['filename'])
-    pil_img = Image.open(img_path)
-    draw = ImageDraw.Draw(pil_img, mode='RGBA')
+def polygon(gt: dict, save=False) -> dict:
+    if save:
+        img_path = os.path.join("examples/", gt['filename'])
+        pil_img = Image.open(img_path)
+        draw = ImageDraw.Draw(pil_img, mode='RGBA')
 
     html = ''.join(gt['html']['structure']['tokens'])
 
@@ -47,22 +48,33 @@ def polygon(gt: dict) -> PIL.Image:
     table_bbox = get_bbox([i['bbox']
                            for i in cells if 'bbox' in i])
     table_W, table_H = [table_bbox[0],
-                         table_bbox[2]], [table_bbox[1], table_bbox[3]]
+                        table_bbox[2]], [table_bbox[1], table_bbox[3]]
     # thead
     thead_bbox = get_bbox([i['bbox']
                            for i in cells[0:thead_nums] if 'bbox' in i])
     thead_bbox = [table_W[0], thead_bbox[1], table_W[1], thead_bbox[3]]
-    
-    draw.rectangle(thead_bbox, fill=(255, 0, 0, 150))
+    if save:
+        draw.rectangle(thead_bbox, fill=(255, 0, 0, 150))
     tbody_bbox = get_bbox(
         [i['bbox'] for i in cells[thead_nums:len(td)] if 'bbox' in i])
     tbody_bbox = [table_W[0], tbody_bbox[1], table_W[1], tbody_bbox[3]]
-    draw.rectangle(tbody_bbox, fill=(0, 0, 255, 150))
+    if save:
+        draw.rectangle(tbody_bbox, fill=(0, 0, 255, 150))
+        pil_img.save(f"vis_thead_tbody/{gt['filename']}")
+    return [
+        {
+            'bbox': thead_bbox,
+            'category_id': 0,
+        },
+        {
+            'bbox': tbody_bbox,
+            'category_id': 1,
 
-    pil_img.save(f"vis_thead_tbody/{gt['filename']}")
-    return pil_img
+        }
+    ]
 
 
-for index, line in enumerate(reader()):
-    logging.info(f"{index}\t->{line['filename']}")
-    polygon(line)
+if __name__ == "__main__":
+    for index, line in enumerate(reader()):
+        logging.info(f"{index}\t->{line['filename']}")
+        polygon(line)

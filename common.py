@@ -28,13 +28,13 @@
 # 'categories': [
 #     {'id': 0, 'name': 'car'},
 # ]
+from table2thead_tbody import polygon
+from coco import main
 from multiprocessing import pool
 import json
-from os import read
-import PIL
 import jsonlines
 import logging
-from PIL import Image, ImageDraw, ImagePath
+from PIL import Image
 import os
 import tqdm
 from multiprocessing import Process
@@ -77,55 +77,89 @@ class Point2Coco:
         return a
 
 
-def main():
-    P2C = Point2Coco()
-    images, annotations, categories = [], [], []
-    categories += [
-        dict(id=0, name='cell'),
-    ]
-    dataset_img_path = "/data/liuzhuang/DataSet/pubtabnet/"
+def func(args):
+    return args['html']['cells']
 
-    logging.info("Start".center(15, "!"))
 
-    def gen_coco(flag: str):
-        annotations, images = [], []
-        bbox_id = 0
-        reader = jsonlines.open(
-            '/data/liuzhuang/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r')
+class COCO:
+    def __init__(self, flag='train') -> None:
+        self.dataset_img_path = "/data/liuzhuang/DataSet/pubtabnet/"
+        self.images, self.annotations, self.categories = [], [], []
+        self.categories += [
+            dict(id=0, name='thead'),
+            dict(id=1, name='tbody'),
+        ]
+        self.flag = flag
+        self.reader = jsonlines.open(
+            '/data/liuzhuang/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r').iter
 
-        for id, img in tqdm.tqdm(enumerate(reader.iter())):
-            im = Image.open(os.path.join(
-                dataset_img_path, flag, img['filename']))
-            W, H = im.size
-            images.append(
-                {
-                    'file_name': img['filename'],
-                    'height': H,
-                    'width': W,
-                    'id': id,
-                },
-            )
-            for box in img['html']['cells']:
-                if 'bbox' not in box:
+    def main(self, func=func) -> None:
+        P2C = Point2Coco()
+
+        def gen_coco(gt: list) -> list:
+            bbox_id = 0
+
+            for id, img in enumerate(gt):
+                try:
+                    if img['split'] != self.flag:
+                        continue
+                    logging.info(f'{id}-->\t{img["filename"]}')
+                    im = Image.open(os.path.join(
+                        self.dataset_img_path, self.flag, img['filename']))
+                    W, H = im.size
+                    self.images.append(
+                        {
+                            'file_name': img['filename'],
+                            'height': H,
+                            'width': W,
+                            'id': id,
+                        },
+                    )
+                    for box in func(img):
+                        if 'bbox' not in box:
+                            continue
+                        bbox_id += 1
+                        point = box['bbox']
+                        point = [
+                            min(point[0], point[2]), min(point[0], point[2]),
+                            max(point[1], point[3]), max(point[1], point[3]),
+                        ]
+                        point_xywh = [
+                            min(point[0], point[2]), min(point[1], point[3]),
+                            max(point[0], point[2])-min(point[0], point[2]),
+                            max(point[1], point[3])-min(point[1], point[3]),
+                        ]
+                        self.annotations.append(
+                            {
+                                # if you have mask labels
+                                'segmentation': P2C._get_seg(point),
+                                'area': P2C._get_area(point),
+                                'iscrowd': 0,
+                                'image_id': id,
+                                'bbox': point_xywh,
+                                'category_id': box.get('category_id', 0),
+                                'id': bbox_id
+                            },
+                        )
+                except Exception as E:
+                    logging.info(*E.args)
                     continue
-                bbox_id += 1
-                point = box['bbox']
-                point_xywh = [
-                    min(point[0], point[2]), min(point[1], point[3]),
-                    max(point[0], point[2])-min(point[0], point[2]),
-                    max(point[1], point[3])-min(point[1], point[3]),
-                ]
-                annotations.append(
-                    {
-                        # if you have mask labels
-                        'segmentation': P2C._get_seg(point),
-                        'area': P2C._get_area(point),
-                        'iscrowd': 0,
-                        'image_id': id,
-                        'bbox': point_xywh,
-                        'category_id': 0,
-                        'id': bbox_id
-                    },
-                )
-        return annotations, images
+        logging.info("Start".center(15, "!"))
+        all_ = self.reader()
+        gen_coco(all_)
+        self.json_save()
 
+    def json_save(self, ):
+        # return annotations, images
+        with open(f'table_json/thead_tbody_coco_{self.flag}.json', 'w') as f:
+            json.dump(dict(
+                images=self.images,
+                annotations=self.annotations,
+                categories=self.categories,
+            ), f)
+
+        logging.info(f"Finish {self.flag}".center(15, '!'))
+
+
+if __name__ == "__main__":
+    COCO(flag='train').main(polygon)
