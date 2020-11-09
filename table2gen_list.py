@@ -59,11 +59,11 @@ def polygon(gt: dict) -> PIL.Image:
             table[-1].append([1])
     print(*table, sep='\n')
 
-    table = np.array(table, np.int)
+    # table = np.array(table, np.int)
 
-#     pil_img.save(f"vis_col_row/{gt['filename']}")
+    # pil_img.save(f"vis_col_row/{gt['filename']}")
 
-#     return pil_img
+    # return pil_img
 
 
 for index, line in enumerate(reader()):

@@ -38,7 +38,7 @@ if __name__ == "__main__":
     for index, i in enumerate(img):
         if i['split'] != 'train':
             continue
-        if index > 1000:
+        if index > 10000:
             break
         logging.info(f"\t{index}->{i['filename']}")
         polygon(i)
