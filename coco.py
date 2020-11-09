@@ -47,7 +47,7 @@ logging.basicConfig(
 
 class Point2Coco:
 
-   # COCO的格式： [x1,y1,w,h] 对应COCO的bbox格式
+    # COCO的格式： [x1,y1,w,h] 对应COCO的bbox格式
     def _get_box(self, points):
         min_x = points[0]
         min_y = points[1]

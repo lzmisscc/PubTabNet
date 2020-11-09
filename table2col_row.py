@@ -15,6 +15,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 reader = jsonlines.open('examples/PubTabNet_Examples.jsonl', 'r').iter
+data_path = "examples/"
 
 
 def get_bbox(points: list) -> list:
@@ -38,7 +39,7 @@ def A_B(A, B):
 
 
 def polygon(gt: dict) -> PIL.Image:
-    img_path = os.path.join("examples/", gt['filename'])
+    img_path = os.path.join(data_path, gt['filename'])
     pil_img_row = Image.open(img_path)
     pil_img_col = pil_img_row.copy()
     html = ''.join(gt['html']['structure']['tokens'])
@@ -94,11 +95,13 @@ def polygon(gt: dict) -> PIL.Image:
         if not flag:
             cols.append(bbox)
     for bbox in cols:
-        draw.rectangle([bbox[0], table_H[0], bbox[2], table_H[1]], fill=(0, 255, 255, 150), outline=(0, 0, 255))
+        draw.rectangle([bbox[0], table_H[0], bbox[2], table_H[1]],
+                       fill=(0, 255, 255, 150), outline=(0, 0, 255))
 
     pil_img_col.save(f"vis_col/{gt['filename']}")
 
 
+# logging
 for index, line in enumerate(reader()):
     logging.info(f"{index}\t->{line['filename']}")
     polygon(line)
