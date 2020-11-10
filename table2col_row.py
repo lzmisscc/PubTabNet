@@ -113,7 +113,7 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
     for bbox in cols:
         cols_bbox.append({
             'bbox': [bbox[0], table_H[0], bbox[2], table_H[1]],
-            'category_id': 0,
+            'category_id': 1,
         })
         if save:
             draw.rectangle([bbox[0], table_H[0], bbox[2], table_H[1]],

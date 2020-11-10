@@ -86,8 +86,8 @@ class COCO:
         self.dataset_img_path = "/data/liuzhuang/DataSet/pubtabnet/"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
-            dict(id=0, name='row'),
-            dict(id=1, name='col'),
+            dict(id=0, name='thead'),
+            dict(id=1, name='tbody'),
         ]
         self.flag = flag
         self.reader = jsonlines.open(
@@ -106,16 +106,15 @@ class COCO:
                 im = Image.open(os.path.join(
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
-                self.images.append(
-                    {
-                        'file_name': img['filename'],
-                        'height': H,
-                        'width': W,
-                        'id': id,
-                    },
-                )
-                if len(self.images) > 5000:
-                    break
+                if self.flag == 'train':
+                    if len(self.images) > 10000:
+                        break
+                elif self.flag == 'val':
+                    if len(self.images) > 5000:
+                        break
+                else:
+                    if len(self.images) > 10000:
+                        break
                 tmp = func(img)
                 if not tmp:
                     continue
@@ -141,6 +140,14 @@ class COCO:
                             'id': bbox_id
                         },
                     )
+                self.images.append(
+                        {
+                            'file_name': img['filename'],
+                            'height': H,
+                            'width': W,
+                            'id': id,
+                        },
+                    )
         logging.info("Start".center(15, "!"))
         all_ = self.reader()
         gen_coco(all_)
@@ -148,7 +155,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_json/row_coco_{self.flag}.json', 'w') as f:
+        with open(f'table_json/thead_tbody_coco_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,
