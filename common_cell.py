@@ -86,8 +86,8 @@ class COCO:
         self.dataset_img_path = "/data/liuzhuang/DataSet/pubtabnet/"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
-            dict(id=0, name='row'),
-            dict(id=1, name='col'),
+            dict(id=0, name='cell'),
+            # dict(id=1, name='col'),
         ]
         self.flag = flag
         self.reader = jsonlines.open(
@@ -155,7 +155,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_json/row_coco_{self.flag}.json', 'w') as f:
+        with open(f'table_json/table_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,
@@ -166,5 +166,5 @@ class COCO:
 
 
 if __name__ == "__main__":
-    COCO(flag='train').main(col_row)
-    COCO(flag='val').main(col_row)
+    COCO(flag='train').main(func)
+    COCO(flag='val').main(func)
