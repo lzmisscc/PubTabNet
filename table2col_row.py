@@ -121,10 +121,6 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
     if save:
         pil_img_col.save(f"vis_col/{gt['filename']}")
 
-    # if classes == 'row':
-    #     return rows_bbox
-    # else:
-    #     return cols_bbox
     return rows_bbox + cols_bbox
 
 
