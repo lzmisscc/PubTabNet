@@ -70,12 +70,16 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
 
     td_nums = 0
     for tr_line in tr:
-        num = len(re.findall(r'<td.*?</td>', tr_line))
-        bbox = [i['bbox']
-         for i in cells[td_nums:td_nums+num] if 'bbox' in i]
-        if not bbox:
+        tmp = re.findall(r'<td.*?</td>', tr_line)
+        num = len(tmp)
+        bbox = [i for i in cells[td_nums:td_nums+num]]
+        res = []
+        for x,y in zip(tmp, bbox):
+            if 'rowspan' not in x and 'bbox' in y:
+                res.append(y['bbox'])
+        if not res:
             continue
-        bbox = get_bbox(bbox)
+        bbox = get_bbox(res)
         bbox = [table_W[0], bbox[1], table_W[1], bbox[3]]
         rows_bbox.append({
             'bbox': bbox,
