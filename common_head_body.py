@@ -106,15 +106,15 @@ class COCO:
                 im = Image.open(os.path.join(
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
-                if self.flag == 'train':
-                    if len(self.images) > 10000:
-                        break
-                elif self.flag == 'val':
-                    if len(self.images) > 500:
-                        break
-                else:
-                    if len(self.images) > 10000:
-                        break
+                # if self.flag == 'train':
+                #     if len(self.images) > 10000:
+                #         break
+                # elif self.flag == 'val':
+                #     if len(self.images) > 500:
+                #         break
+                # else:
+                #     if len(self.images) > 10000:
+                #         break
                 tmp = func(img)
                 if not tmp:
                     continue
@@ -155,7 +155,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_json/thead_tbody_coco_{self.flag}.json', 'w') as f:
+        with open(f'table_all_json/thead_tbody_coco_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,
