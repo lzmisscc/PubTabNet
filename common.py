@@ -155,7 +155,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_json/row_rowspan_coco_{self.flag}.json', 'w') as f:
+        with open(f'table_all_json/row_rowspan_coco_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,
