@@ -1,20 +1,19 @@
-import cnocr
 import jsonlines
 from PIL import Image, ImageDraw
 import os
 import logging
 import numpy as np
 
-logging.basicConfig(level=1, )
-logging.info("WHY?")
-split_lines = cnocr.cn_ocr.line_split
+logging.basicConfig(level=logging.INFO, )
 data_path = "examples/"
 save_data_path = "table_ocr_dataset"
 reader = jsonlines.open("examples/PubTabNet_Examples.jsonl").iter()
 
+def lsp(image):
+    return image
 
 def multi__lines_image_text(image: Image, ):
-    res = split_lines(np.array(image), split_threshold=145, blank=False)
+    res = lsp(image, split_threshold=145, blank=False)
     if len(res) == 1:
         return image
     elif len(res) > 1:
@@ -44,7 +43,6 @@ for id, json in enumerate(reader):
     except:
         img = Image.open(os.path.join(data_path,  json['filename']))
         logging.info("Not ERROR")
-
 
     logging.info(f"{id}\t{json['filename']}")
 
