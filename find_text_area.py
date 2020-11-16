@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def preprocess(gray):
+def preprocess(gray, save_mid_image=False):
     # 1. Sobel算子，x方向求梯度
     sobel = cv2.Sobel(gray, cv2.CV_8U, 1, 0, ksize=3)
     # 2. 二值化
@@ -14,8 +14,8 @@ def preprocess(gray):
         sobel, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)
 
     # 3. 膨胀和腐蚀操作的核函数
-    element1 = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 9))
-    element2 = cv2.getStructuringElement(cv2.MORPH_RECT, (24, 6))
+    element1 = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 1))
+    element2 = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 1))
 
     # 4. 膨胀一次，让轮廓突出
     dilation = cv2.dilate(binary, element2, iterations=1)
@@ -27,10 +27,11 @@ def preprocess(gray):
     dilation2 = cv2.dilate(erosion, element2, iterations=2)
 
     # 7. 存储中间图片
-    cv2.imwrite("test_result_images/binary.png", binary)
-    cv2.imwrite("test_result_images/dilation.png", dilation)
-    cv2.imwrite("test_result_images/erosion.png", erosion)
-    cv2.imwrite("test_result_images/dilation2.png", dilation2)
+    if save_mid_image:
+        cv2.imwrite("test_result_images/binary.png", binary)
+        cv2.imwrite("test_result_images/dilation.png", dilation)
+        cv2.imwrite("test_result_images/erosion.png", erosion)
+        cv2.imwrite("test_result_images/dilation2.png", dilation2)
 
     return dilation2
 
@@ -60,11 +61,13 @@ def detect(img):
     dilation = preprocess(gray)
 
     # 3. 查找和筛选文字区域
-    findTextRegion(gray, dilation, source=img)
+    bbox = findTextRegion(gray, dilation, source=img)
+    return bbox
 
 
 if __name__ == '__main__':
     # 读取文件
-    imagePath = "test_result_images/Snip20201116_1.png"  # sys.argv[1]
+    imagePath = "table_ocr_dataset/train/PMC1626454_002_00_00006.png"  # sys.argv[1]
     img = cv2.imread(imagePath)
-    detect(img)
+    bbox = detect(img)
+    print(bbox)
