@@ -6,10 +6,10 @@ import numpy as np
 from find_text_area import detect
 
 logging.basicConfig(level=logging.INFO, )
-data_path = "examples/"
+data_path = "/data/liuzhuang/DataSet/pubtabnet/"
 save_data_path = "table_ocr_dataset"
 reader = jsonlines.open(
-    "examples/PubTabNet_Examples.jsonl").iter()
+    "/data/liuzhuang/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl").iter()
 
 
 def multi__lines_image_text(image: Image, filename: str):
@@ -20,7 +20,7 @@ def multi__lines_image_text(image: Image, filename: str):
     if len(bbox) == 1:
         return source
     elif len(bbox) > 1:
-        logging.info(f"multi__lines_image_text:\t{filename}")
+        # logging.info(f"multi__lines_image_text:\t{filename}")
         bbox.sort(key=lambda x:x[1])
         bbox = np.array(bbox)
         w = np.sum(bbox[:, 2])
