@@ -39,7 +39,7 @@ import os
 import tqdm
 from multiprocessing import Process
 from table2col_row import polygon as col_row
-
+from find_row_error import polygon as row
 logging.basicConfig(
     level=logging.INFO
 )
@@ -86,7 +86,7 @@ class COCO:
         self.dataset_img_path = "/data/liuzhuang/DataSet/pubtabnet/"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
-            dict(id=0, name='cell'),
+            dict(id=0, name='row'),
             # dict(id=1, name='col'),
         ]
         self.flag = flag
@@ -107,13 +107,13 @@ class COCO:
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
                 if self.flag == 'train':
-                    if len(self.images) > 50000:
+                    if len(self.images) > 10000:
                         break
                 elif self.flag == 'val':
-                    if len(self.images) > 500:
+                    if len(self.images) > 1000:
                         break
                 else:
-                    if len(self.images) > 10000:
+                    if len(self.images) > 100:
                         break
                 tmp = func(img)
                 if not tmp:
@@ -155,7 +155,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_json/table_{self.flag}.json', 'w') as f:
+        with open(f'table_json/table_fix_row_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,
@@ -166,5 +166,5 @@ class COCO:
 
 
 if __name__ == "__main__":
-    COCO(flag='train').main(func)
-    COCO(flag='val').main(func)
+    COCO(flag='train').main(row)
+    COCO(flag='val').main(row)
