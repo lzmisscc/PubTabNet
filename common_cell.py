@@ -83,7 +83,7 @@ def func(args):
 
 class COCO:
     def __init__(self, flag='train') -> None:
-        self.dataset_img_path = "/data/liuzhuang/DataSet/pubtabnet/"
+        self.dataset_img_path = "pubtabnet/"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
             dict(id=0, name='cell'),
@@ -91,7 +91,7 @@ class COCO:
         ]
         self.flag = flag
         self.reader = jsonlines.open(
-            '/data/liuzhuang/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r').iter
+            'pubtabnet/PubTabNet_2.0.0.jsonl', 'r').iter
 
     def main(self, func=func) -> None:
         P2C = Point2Coco()
@@ -106,15 +106,15 @@ class COCO:
                 im = Image.open(os.path.join(
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
-                if self.flag == 'train':
-                    if len(self.images) > 50000:
-                        break
-                elif self.flag == 'val':
-                    if len(self.images) > 500:
-                        break
-                else:
-                    if len(self.images) > 10000:
-                        break
+                # if self.flag == 'train':
+                #     if len(self.images) > 10000:
+                #         break
+                # elif self.flag == 'val':
+                #     if len(self.images) > 500:
+                #         break
+                # else:
+                #     if len(self.images) > 1000:
+                #         break
                 tmp = func(img)
                 if not tmp:
                     continue
@@ -155,7 +155,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_json/table_{self.flag}.json', 'w') as f:
+        with open(f'table_all_json/table_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,
