@@ -106,15 +106,15 @@ class COCO:
                 im = Image.open(os.path.join(
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
-                # if self.flag == 'train':
-                #     if len(self.images) > 10000:
-                #         break
-                # elif self.flag == 'val':
-                #     if len(self.images) > 500:
-                #         break
-                # else:
-                #     if len(self.images) > 1000:
-                #         break
+                if self.flag == 'train':
+                    if len(self.images) > 10000:
+                        break
+                elif self.flag == 'val':
+                    if len(self.images) > 500:
+                        break
+                else:
+                    if len(self.images) > 1000:
+                        break
                 tmp = func(img)
                 if not tmp:
                     continue
