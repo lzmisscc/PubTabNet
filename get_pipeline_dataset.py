@@ -17,6 +17,7 @@ def format_html(img):
                     1 else token for token in cell['tokens']]
             cell = ''.join(cell)
             html_code.insert(i + 1, cell)
+
     html_code = ''.join(html_code)
     html_code = '''<html>
                    <head>
@@ -52,10 +53,6 @@ def main(split="val"):
         file = dict(
             html=format_html(img),
             type=split,
-            # tag_len=0,
-            # cell_len_max=0,
-            # width=0,
-            # height=0,
         )
         res[filename] = file
     with open(f"src/{split}.json", "w") as f:

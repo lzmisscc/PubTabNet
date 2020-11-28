@@ -107,13 +107,13 @@ class COCO:
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
                 if self.flag == 'train':
-                    if len(self.images) > 10000:
+                    if len(self.images) >= 10000:
                         break
                 elif self.flag == 'val':
-                    if len(self.images) > 500:
+                    if len(self.images) >= 500:
                         break
                 else:
-                    if len(self.images) > 1000:
+                    if len(self.images) >= 1000:
                         break
                 tmp = func(img)
                 if not tmp:
@@ -166,5 +166,5 @@ class COCO:
 
 
 if __name__ == "__main__":
-    COCO(flag='train').main(func)
+    # COCO(flag='train').main(func)
     COCO(flag='val').main(func)
