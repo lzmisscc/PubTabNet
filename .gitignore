@@ -124,3 +124,7 @@ error_image/
 vis_thead_tbody/
 table_ocr_dataset/
 vis_thead_tbody/
+coco2png/
+pubtabnet
+cocostuff
+find_text_area.zip

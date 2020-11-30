@@ -37,8 +37,8 @@ def format_html(img):
                    </html>''' % html_code
 
     # prettify the html
-    soup = bs(html_code)
-    html_code = soup.prettify()
+    # soup = bs(html_code)
+    # html_code = soup.prettify()
     return html_code
 
 
