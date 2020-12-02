@@ -103,7 +103,7 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
         if save:
             draw.rectangle(bbox, outline=(255, 0, 255))
     if save:
-        pil_img_row.save(f"vis_row/{gt['filename']}")
+        pil_img_row.save(f"row_error/row_3/{gt['filename']}")
 
     # td 进行投影决定列的宽度。
     if save:
@@ -137,6 +137,7 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
             draw.rectangle([bbox[0], table_H[0], bbox[2], table_H[1]],
                            fill=(0, 255, 255, 150), outline=(0, 0, 255))
     if save:
+        # pass
         pil_img_col.save(f"vis_col/{gt['filename']}")
 
     return rows_bbox + cols_bbox

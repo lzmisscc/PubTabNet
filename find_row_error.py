@@ -14,8 +14,11 @@ import re
 logging.basicConfig(
     level=logging.INFO
 )
-reader = jsonlines.open('/data/liuzhuang/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r').iter
-data_path = "/data/liuzhuang/DataSet/pubtabnet/"
+# reader = jsonlines.open('/data/liuzhuang/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r').iter
+# data_path = "/data/liuzhuang/DataSet/pubtabnet/"
+
+reader = jsonlines.open('examples/PubTabNet_Examples.jsonl', 'r').iter
+data_path = "examples/"
 
 
 def get_bbox(points: list) -> list:
@@ -51,6 +54,9 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
 
     if save:
         img_path = os.path.join(data_path, gt['split'], gt['filename'])
+        if not os.path.exists(img_path):
+            img_path = os.path.join(data_path, gt['filename'])
+
         pil_img_row = Image.open(img_path)
         pil_img_col = pil_img_row.copy()
     html = ''.join(gt['html']['structure']['tokens'])
@@ -154,9 +160,9 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
         if save:
             draw.rectangle(bbox, outline=(255, 0, 255))
     if save:
-        copy.save(f"erro_row_picture/{gt['filename'].strip('.png')}_row.png")
-        copy_cell.save(f"erro_row_picture/{gt['filename'].strip('.png')}.png")
-        copy_fix.save(f"erro_row_picture/{gt['filename'].strip('.png')}_fix.png")
+        copy.save(f"row_error/row_4/{gt['filename'].strip('.png')}_row.png")
+        # copy_cell.save(f"erro_row_picture/{gt['filename'].strip('.png')}.png")
+        # copy_fix.save(f"erro_row_picture/{gt['filename'].strip('.png')}_fix.png")
 
 
 

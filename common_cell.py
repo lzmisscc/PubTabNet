@@ -166,5 +166,5 @@ class COCO:
 
 
 if __name__ == "__main__":
-    # COCO(flag='train').main(func)
-    COCO(flag='val').main(func)
+    COCO(flag='train').main(func)
+    # COCO(flag='val').main(func)
