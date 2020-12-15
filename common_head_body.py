@@ -83,7 +83,7 @@ def func(args):
 
 class COCO:
     def __init__(self, flag='train') -> None:
-        self.dataset_img_path = "/data/liuzhuang/DataSet/pubtabnet/"
+        self.dataset_img_path = "pubtabnet"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
             dict(id=0, name='thead'),
@@ -91,7 +91,7 @@ class COCO:
         ]
         self.flag = flag
         self.reader = jsonlines.open(
-            '/data/liuzhuang/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r').iter
+            'pubtabnet/PubTabNet_2.0.0.jsonl', 'r').iter
 
     def main(self, func=func) -> None:
         P2C = Point2Coco()
@@ -155,7 +155,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_all_json/thead_tbody_coco_{self.flag}.json', 'w') as f:
+        with open(f'shizhuang_table_json_val_all/thead_tbody_coco_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,
@@ -166,5 +166,5 @@ class COCO:
 
 
 if __name__ == "__main__":
-    COCO(flag='train').main(thead_tbody)
+    # COCO(flag='train').main(thead_tbody)
     COCO(flag='val').main(thead_tbody)

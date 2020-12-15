@@ -102,15 +102,12 @@ class COCO:
             for id, img in enumerate(gt):
                 if img['split'] != self.flag:
                     continue
-                logging.info(f'{id}-->\t{img["filename"]}')
-                im = Image.open(os.path.join(
-                    self.dataset_img_path, self.flag, img['filename']))
-                W, H = im.size
+
                 if self.flag == 'train':
-                    if len(self.images) > 10000:
+                    if len(self.images) > 200000:
                         break
                 elif self.flag == 'val':
-                    if len(self.images) > 1000:
+                    if len(self.images) > 10000:
                         break
                 else:
                     if len(self.images) > 100:
@@ -118,6 +115,10 @@ class COCO:
                 tmp = func(img)
                 if not tmp:
                     continue
+                logging.info(f'{id}-->\t{img["filename"]}')
+                im = Image.open(os.path.join(
+                    self.dataset_img_path, self.flag, img['filename']))
+                W, H = im.size
                 for box in func(img):
                     if 'bbox' not in box:
                         continue
@@ -155,7 +156,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_json/table_fix_row_{self.flag}.json', 'w') as f:
+        with open(f'table_json_1204/table_row_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,

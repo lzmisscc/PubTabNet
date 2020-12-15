@@ -54,8 +54,8 @@ class Point2Coco:
         max_x = points[2]
         max_y = points[3]
         return [min_x, min_y, max_x - min_x, max_y - min_y]
+    
     # 计算面积
-
     def _get_area(self, points):
         min_x = points[0]
         min_y = points[1]
@@ -106,15 +106,15 @@ class COCO:
                 im = Image.open(os.path.join(
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
-                if self.flag == 'train':
-                    if len(self.images) >= 10000:
-                        break
-                elif self.flag == 'val':
-                    if len(self.images) >= 500:
-                        break
-                else:
-                    if len(self.images) >= 1000:
-                        break
+                # if self.flag == 'train':
+                #     if len(self.images) >= 10000:
+                #         break
+                # elif self.flag == 'val':
+                #     if len(self.images) >= 500:
+                #         break
+                # else:
+                #     if len(self.images) >= 1000:
+                #         break
                 tmp = func(img)
                 if not tmp:
                     continue
@@ -155,7 +155,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'coco2png/table_json/table_{self.flag}.json', 'w') as f:
+        with open(f'shizhuang_table_json_val_all/table_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,

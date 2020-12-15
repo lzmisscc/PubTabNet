@@ -14,11 +14,11 @@ import re
 logging.basicConfig(
     level=logging.INFO
 )
-# reader = jsonlines.open('/data/liuzhuang/DataSet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r').iter
-# data_path = "/data/liuzhuang/DataSet/pubtabnet/"
+reader = jsonlines.open('/data/lz/GitHub/PubTabNet/pubtabnet/PubTabNet_2.0.0.jsonl', 'r').iter
+data_path = "/data/share/pubtabnet/val"
 
-reader = jsonlines.open('examples/PubTabNet_Examples.jsonl', 'r').iter
-data_path = "examples/"
+# reader = jsonlines.open('examples/PubTabNet_Examples.jsonl', 'r').iter
+# data_path = "examples/"
 
 
 def get_bbox(points: list) -> list:
@@ -85,31 +85,31 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
     fix_bbox = []
     error_bbox = []
     # cell的阈值大于0.05会被踢出bboxes
-    for bbox in tmp_bbox:
-        tmp = []
-        for B in tmp_bbox:
-            iou_score = IOU(B, bbox)
-            if iou_score > 0.05 and iou_score != 1.0:
-                tmp.append(iou_score)
-        if len(tmp) > 2:
-            print("tmp", len(tmp))
-        if tmp:
-            new_bbox.append(tmp)
-            error_bbox.append(bbox)
-        else:
-            fix_bbox.append(bbox)
-    if len(error_bbox) > 3:
-        return 
-    if save:
-        copy_cell = pil_img_row.copy()
-        draw = ImageDraw.Draw(copy_cell)         
-        for box in [i['bbox'] for i in cells if 'bbox' in i]:
-            draw.rectangle(box, outline=(255, 0, 255))
-    if save:
-        copy_fix = pil_img_row.copy()
-        draw = ImageDraw.Draw(copy_fix)
-        for box in fix_bbox:
-            draw.rectangle(box, outline=(255, 0, 255))
+    # for bbox in tmp_bbox:
+    #     tmp = []
+    #     for B in tmp_bbox:
+    #         iou_score = IOU(B, bbox)
+    #         if iou_score > 0.05 and iou_score != 1.0:
+    #             tmp.append(iou_score)
+    #     if len(tmp) > 2:
+    #         print("tmp", len(tmp))
+    #     if tmp:
+    #         new_bbox.append(tmp)
+    #         error_bbox.append(bbox)
+    #     else:
+    #         fix_bbox.append(bbox)
+    # if len(error_bbox) > 3:
+    #     return 
+    # if save:
+    #     copy_cell = pil_img_row.copy()
+    #     draw = ImageDraw.Draw(copy_cell)         
+    #     for box in [i['bbox'] for i in cells if 'bbox' in i]:
+    #         draw.rectangle(box, outline=(255, 0, 255))
+    # if save:
+    #     copy_fix = pil_img_row.copy()
+    #     draw = ImageDraw.Draw(copy_fix)
+    #     for box in fix_bbox:
+    #         draw.rectangle(box, outline=(255, 0, 255))
 
     # return 
         
@@ -147,7 +147,7 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
             height_score = height_IOU(i,j)
             tmp.append(height_score)
         height_lt.append(max(tmp))
-    # 高度阈值小于0.01,不保存
+    # 高度阈值大于0.01,不保存
     if height_lt and max(height_lt) > 0.01:
         return 
 
@@ -160,9 +160,9 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
         if save:
             draw.rectangle(bbox, outline=(255, 0, 255))
     if save:
-        copy.save(f"row_error/row_4/{gt['filename'].strip('.png')}_row.png")
-        # copy_cell.save(f"erro_row_picture/{gt['filename'].strip('.png')}.png")
-        # copy_fix.save(f"erro_row_picture/{gt['filename'].strip('.png')}_fix.png")
+        copy.save(f"row_error/row_5/{gt['filename'].strip('.png')}_row.png")
+        # copy_cell.save(f"row_error/row_5/{gt['filename'].strip('.png')}.png")
+        # copy_fix.save(f"row_error/row_5/{gt['filename'].strip('.png')}_fix.png")
 
 
 
@@ -192,10 +192,14 @@ def height_IOU(bbox_A,  bbox_B):
 
 if __name__ == "__main__":
     # logging
-    for index, line in enumerate(reader()):
-        # if line['filename'] not in ['PMC1421383_002_00.png', 'PMC1421415_008_00.png', 'PMC1064888_003_01.png', ]:
-        #     continue
-        if index > 10000:
-            break
+    import tqdm
+    for index, line in tqdm.tqdm(enumerate(reader())):
+        if line['filename'] not in ['PMC2246125_003_00.png', 'PMC3230842_009_00.png']:
+            continue
+        # if index > 10000:
+        #     break
         logging.info(f"{index}\t->{line['filename']}")
         polygon(line, save=True)
+        break
+
+
