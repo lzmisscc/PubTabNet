@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup as bs
 from html import escape
 from PIL import Image, ImageDraw
 import os.path as osp
+import random
 
 
 class MyTable:
@@ -13,9 +14,11 @@ class MyTable:
         self.gt = gt
         self.html = gt['html']['structure']['tokens']
         self.html = ''.join(self.html)
+
         self.cells = gt['html']['cells']
         self.bbox = [box['bbox'] for box in self.cells if 'bbox' in box]
         self.text = [t['tokens'] for t in self.cells if t['tokens']]
+
         self.filename = gt['filename']
         self.split = gt['split']
         self.image = Image.open(
@@ -178,21 +181,80 @@ class MyTable:
             return html_code
 
         return format_html(self.gt)
+# class fliter_head:
+#     def __init__(self, gt):
+#         self.html =
+#         self.thead = re.sub(r"(.*?)<thead>(.*?)</thead>(.*)", r"\2",self.html)
+#         self.thead_tds = re.findall("<td.*?</td>", self.thead)
+#         self.thead_length = len(self.thead_tds)
+#         self.html = re.sub(r"(.*?)<thead>(.*?)</thead>(.*)", r"\3",self.html)
+#         self.cells = self.cells[:self.thead_length]
+#         self.bbox = self.bbox[:self.thead_length]
+#         self.text = self.text[:self.thead_length]
 
 
-if __name__ == "__main__":
-    import tqdm
+def get_bbox(points: list) -> list:
+    # [[], ...,[]] -> [x_min,y_min,x_max,y_max]
+    points = np.array(points)
+    return list(map(int, [
+        np.min(points[:, 0]),
+        np.min(points[:, 1]),
+        np.max(points[:, 2]),
+        np.max(points[:, 3]),
+    ]))
 
-    Reader = jsonlines.open("pubtabnet/PubTabNet_2.0.0.jsonl", "r").iter()
-    Reader = tqdm.tqdm(Reader)
-    for gt in Reader:
+samples = list(range(256))
+
+def main(gt, save_flag=True):
+    # for gt in Reader:
+        # if gt['filename'] not in ['PMC2575590_004_00.png', 'PMC6008895_006_01.png', 'PMC4683521_005_00.png']:
+        #     continue
+
+        # 引入去除表头
+    try:
         t = MyTable(gt=gt)
         col_same = t.create_same_col_matrix()
         all_col = t.all_col
         bbox = t.bbox
+        table_mat = t.table_mat
+        fliter_bbox = []
+        for i in table_mat:
+            for j in i:
+                if j != None:
+                    if len(i)-i[::-1].index(j)-1 != i.index(j):
+                        fliter_bbox.append(j)
         filename = gt['filename']
         im = Image.open(f"pubtabnet/{gt['split']}/{filename}")
         draw = ImageDraw.Draw(im)
-        for b in bbox:
-            draw.rectangle(b, outline=(0,2555,0))
-        im.save(f"get_new_data/{filename}")
+        cols_bbox = []
+        l_, t_, r_, b_ = get_bbox(bbox)
+        for id, b in enumerate(all_col):
+            box = [bbox[i] for i in b]
+            # l_, t_, r_, b_ = get_bbox(box)
+            # _, H = r_-l_, b_-t_
+
+            box = [bbox[i] for i in b if i not in fliter_bbox]
+            l_, _, r_, _ = get_bbox(box)
+            # W, _ = r_-l_, b_-t_
+            # b = bbox[b[-1]]
+            draw.rectangle([l_, t_, r_, b_], outline=tuple(random.sample(samples, 3)))
+            cols_bbox.append({
+                    'bbox': [l_, t_, r_, b_],
+                    'category_id': 1,
+                })
+        if save_flag:
+            im.save(f"get_new_data/{filename}")
+        return cols_bbox
+    except Exception:
+        return None
+
+if __name__ == "__main__":
+    import tqdm
+    from multiprocessing import Pool
+    
+    Reader = jsonlines.open("pubtabnet/PubTabNet_2.0.0.jsonl", "r").iter()
+    Reader = [Reader.__next__() for i in range(100000)]
+    Reader = tqdm.tqdm(list(Reader))
+
+    with Pool(40) as P:
+        P.map(main, Reader)

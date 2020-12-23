@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def preprocess(gray, save_mid_image=False):
+def preprocess(gray, save_mid_image=True):
     # 1. Sobel算子，x方向求梯度
     sobel = cv2.Sobel(gray, cv2.CV_8U, 1, 0, ksize=3)
     # 2. 二值化
@@ -14,17 +14,17 @@ def preprocess(gray, save_mid_image=False):
         sobel, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)
 
     # 3. 膨胀和腐蚀操作的核函数
-    element1 = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 1))
-    element2 = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 1))
+    element1 = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 1))
+    element2 = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 1))
 
     # 4. 膨胀一次，让轮廓突出
-    dilation = cv2.dilate(binary, element2, iterations=1)
+    dilation = cv2.dilate(binary, element2, iterations=10)
 
     # 5. 腐蚀一次，去掉细节，如表格线等。注意这里去掉的是竖直的线
-    erosion = cv2.erode(dilation, element1, iterations=1)
+    erosion = cv2.erode(dilation, element1, iterations=10)
 
     # 6. 再次膨胀，让轮廓明显一些
-    dilation2 = cv2.dilate(erosion, element2, iterations=2)
+    dilation2 = cv2.dilate(erosion, element2, iterations=2000)
 
     # 7. 存储中间图片
     if save_mid_image:
