@@ -94,8 +94,8 @@ class COCO:
         self.dataset_img_path = "pubtabnet/"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
-            dict(id=100, name='line'),
-            # dict(id=1, name='col'),
+            dict(id=1, name='line'),
+            dict(id=2, name='line_b'),
         ]
         self.flag = flag
         self.reader = jsonlines.open(
@@ -118,22 +118,27 @@ class COCO:
                 im = Image.open(os.path.join(
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
-                # if self.flag == 'train':
-                #     if len(self.images) >= 10000:
-                #         break
-                # elif self.flag == 'val':
-                #     if len(self.images) >= 10000:
-                #         break
-                # else:
-                #     if len(self.images) >= 1000:
-                #         break
+
+                if self.flag == 'train':
+                    if len(self.images) >= 10000:
+                        break
+                elif self.flag == 'val':
+                    if len(self.images) >= 10000:
+                        break
+                else:
+                    if len(self.images) >= 1000:
+                        break
+
                 tmp = func(img)
                 if not tmp:
                     continue
 
                 debug_bboxes = []
                 flag = 0
-                for box in func(img):
+                cells = img['html']['cells']
+                tokens = ["".join(i['tokens']) for i in cells]
+
+                for box,token in zip(func(img), tokens):
 
                     if 'bbox' not in box:
                         continue
@@ -163,7 +168,7 @@ class COCO:
                                 'iscrowd': 0,
                                 'image_id': id,
                                 'bbox': point_xywh,
-                                'category_id': box.get('category_id', 100),
+                                'category_id': 1 if '<b>' not in token else 2,
                                 'id': bbox_id
                             },
                         )
@@ -192,7 +197,7 @@ class COCO:
                                     'iscrowd': 0,
                                     'image_id': id,
                                     'bbox': point_xywh,
-                                    'category_id': box.get('category_id', 100),
+                                    'category_id': 1 if '<b>' not in token else 2,
                                     'id': bbox_id
                                 },
                             )
