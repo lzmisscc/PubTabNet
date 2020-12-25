@@ -155,7 +155,7 @@ def polygon(gt: dict, save: bool = False, classes: str = 'row') -> PIL.Image:
     for bbox in res_bbox:
         rows_bbox.append({
             'bbox': bbox,
-            'category_id': 0,
+            'category_id': 100,
         })
         if save:
             draw.rectangle(bbox, outline=(255, 0, 255))

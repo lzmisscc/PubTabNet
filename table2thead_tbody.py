@@ -71,11 +71,11 @@ def polygon(gt: dict, save=False) -> dict:
     return [
         {
             'bbox': thead_bbox,
-            'category_id': 0,
+            'category_id': 101,
         },
         {
             'bbox': tbody_bbox,
-            'category_id': 1,
+            'category_id': 102,
 
         }
     ]

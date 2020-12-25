@@ -86,7 +86,7 @@ class COCO:
         self.dataset_img_path = "pubtabnet/"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
-            dict(id=0, name='row'),
+            dict(id=100, name='row'),
             # dict(id=1, name='col'),
         ]
         self.flag = flag
@@ -103,15 +103,15 @@ class COCO:
                 if img['split'] != self.flag:
                     continue
 
-                if self.flag == 'train':
-                    if len(self.images) > 200000:
-                        break
-                elif self.flag == 'val':
-                    if len(self.images) > 10000:
-                        break
-                else:
-                    if len(self.images) > 100:
-                        break
+                # if self.flag == 'train':
+                #     if len(self.images) > 200000:
+                #         break
+                # elif self.flag == 'val':
+                #     if len(self.images) > 10000:
+                #         break
+                # else:
+                #     if len(self.images) > 100:
+                #         break
                 tmp = func(img)
                 if not tmp:
                     continue
@@ -137,7 +137,7 @@ class COCO:
                             'iscrowd': 0,
                             'image_id': id,
                             'bbox': point_xywh,
-                            'category_id': box.get('category_id', 0),
+                            'category_id': box.get('category_id', 100),
                             'id': bbox_id
                         },
                     )
@@ -156,7 +156,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_json_1204/table_row_{self.flag}.json', 'w') as f:
+        with open(f'table_all_json_1224/table_row_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,

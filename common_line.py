@@ -94,8 +94,8 @@ class COCO:
         self.dataset_img_path = "pubtabnet/"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
-            dict(id=1, name='line'),
-            dict(id=2, name='line_b'),
+            dict(id=103, name='line'),
+            dict(id=104, name='line_b'),
         ]
         self.flag = flag
         self.reader = jsonlines.open(
@@ -119,15 +119,15 @@ class COCO:
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
 
-                if self.flag == 'train':
-                    if len(self.images) >= 10000:
-                        break
-                elif self.flag == 'val':
-                    if len(self.images) >= 10000:
-                        break
-                else:
-                    if len(self.images) >= 1000:
-                        break
+                # if self.flag == 'train':
+                #     if len(self.images) >= 10000:
+                #         break
+                # elif self.flag == 'val':
+                #     if len(self.images) >= 10000:
+                #         break
+                # else:
+                #     if len(self.images) >= 1000:
+                #         break
 
                 tmp = func(img)
                 if not tmp:
@@ -197,7 +197,7 @@ class COCO:
                                     'iscrowd': 0,
                                     'image_id': id,
                                     'bbox': point_xywh,
-                                    'category_id': 1 if '<b>' not in token else 2,
+                                    'category_id': 103 if '<b>' not in token else 104,
                                     'id': bbox_id
                                 },
                             )
@@ -227,7 +227,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'shizhuang_table_json_val_all/table_line_1221_{self.flag}.json', 'w') as f:
+        with open(f'table_all_json_1224/table_line_1221_{self.flag}_v2.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,

@@ -92,7 +92,7 @@ class COCO:
         self.dataset_img_path = "pubtabnet/"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
-            dict(id=100, name='cell'),
+            dict(id=106, name='cell'),
             # dict(id=1, name='col'),
         ]
         self.flag = flag
@@ -120,15 +120,15 @@ class COCO:
                 im = Image.open(os.path.join(
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
-                if self.flag == 'train':
-                    if len(self.images) >= 300000:
-                        break
-                elif self.flag == 'val':
-                    if len(self.images) >= 10000:
-                        break
-                else:
-                    if len(self.images) >= 1000:
-                        break
+                # if self.flag == 'train':
+                #     if len(self.images) >= 300000:
+                #         break
+                # elif self.flag == 'val':
+                #     if len(self.images) >= 10000:
+                #         break
+                # else:
+                #     if len(self.images) >= 1000:
+                #         break
                 tmp = func(img)
                 if not tmp:
                     continue
@@ -150,7 +150,7 @@ class COCO:
                             'iscrowd': 0,
                             'image_id': id,
                             'bbox': point_xywh,
-                            'category_id': box.get('category_id', 100),
+                            'category_id': 106,
                             'id': bbox_id
                         },
                     )
@@ -169,7 +169,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_json_1204/table_{self.flag}.json', 'w') as f:
+        with open(f'table_all_json_1224/table_cell_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,
@@ -208,4 +208,4 @@ def gt_fliter(bboxes):
 
 if __name__ == "__main__":
     COCO(flag='train').main(func)
-    # COCO(flag='val').main(func)
+    COCO(flag='val').main(func)

@@ -44,7 +44,6 @@ import os
 import tqdm
 from multiprocessing import Process
 from table2col_row import polygon as col_row
-from table import main as col
 import tqdm
 
 logging.basicConfig(
@@ -93,8 +92,8 @@ class COCO:
         self.dataset_img_path = "pubtabnet/"
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
-            # dict(id=100, name='col'),
-            dict(id=105, name='col'),
+            dict(id=106, name='cell'),
+            # dict(id=1, name='col'),
         ]
         self.flag = flag
         self.reader = jsonlines.open(
@@ -110,30 +109,49 @@ class COCO:
             for id, img in enumerate(gt):
                 if img['split'] != self.flag:
                     continue
-                # bboxes = [i['bbox'] for i in func(img) if 'bbox' in i]
-                # if not gt_fliter(bboxes):
-                #     skip_nums += 1
-                #     # print("skip_nums:", skip_nums)
-                #     # print("id:", id)
-                #     continue
-                # gt.set_description(f"total:{id},skip_nums:{skip_nums}")
-                logging.info(f'{id}-->\t{img["filename"]}')
+                bboxes = [i['bbox'] for i in func(img) if 'bbox' in i]
+                if not gt_fliter(bboxes):
+                    skip_nums += 1
+                    # print("skip_nums:", skip_nums)
+                    # print("id:", id)
+                    continue
+                gt.set_description(f"total:{id},skip_nums:{skip_nums}")
+                # logging.info(f'{id}-->\t{img["filename"]}')
                 im = Image.open(os.path.join(
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
-                # if self.flag == 'train':
-                #     if len(self.images) >= 10000:
-                #         break
-                # elif self.flag == 'val':
-                #     if len(self.images) >= 10000:
-                #         break
-                # else:
-                #     if len(self.images) >= 1000:
-                #         break
                 tmp = func(img)
                 if not tmp:
                     continue
-                for box in func(img):
+                # get cell
+                for box in tmp:
+                    if 'bbox' not in box:
+                        continue
+                    bbox_id += 1
+                    point = box['bbox']
+                    point_xywh = [
+                        min(point[0], point[2]), min(point[1], point[3]),
+                        max(point[0], point[2])-min(point[0], point[2]),
+                        max(point[1], point[3])-min(point[1], point[3]),
+                    ]
+                    self.annotations.append(
+                        {
+                            # if you have mask labels
+                            'segmentation': P2C._get_seg(point),
+                            'area': P2C._get_area(point),
+                            'iscrowd': 0,
+                            'image_id': id,
+                            'bbox': point_xywh,
+                            'category_id': 106,
+                            'id': bbox_id
+                        },
+                    )
+                # get col
+                from table import main as col
+                tmp = col(img)
+                if not tmp:
+                    continue
+                for box in tmp:
                     if 'bbox' not in box:
                         continue
                     bbox_id += 1
@@ -163,6 +181,71 @@ class COCO:
                         'id': id,
                     },
                 )
+                # get row
+                from find_row_error import polygon as row
+
+                tmp = row(img)
+                if not tmp:
+                    continue
+                for box in tmp:
+                    if 'bbox' not in box:
+                        continue
+                    bbox_id += 1
+                    point = box['bbox']
+                    point_xywh = [
+                        min(point[0], point[2]), min(point[1], point[3]),
+                        max(point[0], point[2])-min(point[0], point[2]),
+                        max(point[1], point[3])-min(point[1], point[3]),
+                    ]
+                    self.annotations.append(
+                        {
+                            # if you have mask labels
+                            'segmentation': P2C._get_seg(point),
+                            'area': P2C._get_area(point),
+                            'iscrowd': 0,
+                            'image_id': id,
+                            'bbox': point_xywh,
+                            'category_id': box.get('category_id', 100),
+                            'id': bbox_id
+                        },
+                    )
+                # get head body
+                tmp = func(img)
+                if not tmp:
+                    continue
+                for box in tmp:
+                    if 'bbox' not in box:
+                        continue
+                    bbox_id += 1
+                    point = box['bbox']
+                    point_xywh = [
+                        min(point[0], point[2]), min(point[1], point[3]),
+                        max(point[0], point[2])-min(point[0], point[2]),
+                        max(point[1], point[3])-min(point[1], point[3]),
+                    ]
+                    self.annotations.append(
+                        {
+                            # if you have mask labels
+                            'segmentation': P2C._get_seg(point),
+                            'area': P2C._get_area(point),
+                            'iscrowd': 0,
+                            'image_id': id,
+                            'bbox': point_xywh,
+                            'category_id': box.get('category_id', 101),
+                            'id': bbox_id
+                        },
+                    )
+
+
+                self.images.append(
+                    {
+                        'file_name': img['filename'],
+                        'height': H,
+                        'width': W,
+                        'id': id,
+                    },
+                )
+
         logging.info("Start".center(15, "!"))
         all_ = self.reader()
         gen_coco(all_)
@@ -170,7 +253,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_all_json_1224/table_col_1216_{self.flag}.json', 'w') as f:
+        with open(f'table_all_json_1224/table_megre_{self.flag}.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,
@@ -208,5 +291,5 @@ def gt_fliter(bboxes):
 
 
 if __name__ == "__main__":
-    COCO(flag='train').main(col)
-    COCO(flag='val').main(col)
+    COCO(flag='train').main(func)
+    COCO(flag='val').main(func)

@@ -101,7 +101,9 @@ def detect(img, imagePath):
     # 3. 查找和筛选文字区域
     # bbox = findTextRegion(gray, dilation, source=img)
     h, w = gray.shape
-    _h = [0] + _h + [h]
+    avg_height = h // len(_h)
+    _h = [i for i in range(0, h+1, avg_height)]
+    # _h = [0] + _h + [h]
     bboxes = []
     for i in range(len(_h)-1):
         bboxes.append([0, _h[i], w, _h[i+1]])
