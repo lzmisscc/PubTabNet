@@ -95,7 +95,8 @@ class COCO:
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
             dict(id=103, name='line'),
-            dict(id=104, name='line_b'),
+            dict(id=104, name='line_b_l_r'),
+            dict(id=200, name='line_b_m'),
         ]
         self.flag = flag
         self.reader = jsonlines.open(
@@ -123,7 +124,7 @@ class COCO:
                 #     if len(self.images) >= 10000:
                 #         break
                 # elif self.flag == 'val':
-                #     if len(self.images) >= 10000:
+                #     if len(self.images) >= 1000:
                 #         break
                 # else:
                 #     if len(self.images) >= 1000:
@@ -147,8 +148,13 @@ class COCO:
                     w, h = crop.size
                     res = detect(np.array(crop, np.uint8),
                                  imagePath=None)
-
-
+                    if '<b>' in token:
+                        if token.startswith("<b>") and token.endswith("</b>"):
+                            category_id = 104
+                        else:
+                            category_id = 200
+                    else:
+                        category_id = 103
                     if not res:
                         bbox_id += 1
                         if h > 15:
@@ -168,7 +174,7 @@ class COCO:
                                 'iscrowd': 0,
                                 'image_id': id,
                                 'bbox': point_xywh,
-                                'category_id': 1 if '<b>' not in token else 2,
+                                'category_id': category_id,
                                 'id': bbox_id
                             },
                         )
@@ -197,7 +203,7 @@ class COCO:
                                     'iscrowd': 0,
                                     'image_id': id,
                                     'bbox': point_xywh,
-                                    'category_id': 103 if '<b>' not in token else 104,
+                                    'category_id': category_id,
                                     'id': bbox_id
                                 },
                             )
@@ -206,12 +212,12 @@ class COCO:
                 if not gt_fliter(debug_bboxes) or flag:
                     continue
 
-                debug_draw = ImageDraw.Draw(im)
+                # debug_draw = ImageDraw.Draw(im)
 
-                for debug_b in debug_bboxes:
-                    debug_draw.rectangle(debug_b, outline=(100, random.choice(random_color), 255 - random.choice(random_color)))
+                # for debug_b in debug_bboxes:
+                #     debug_draw.rectangle(debug_b, outline=(100, random.choice(random_color), 255 - random.choice(random_color)))
                 
-                im.save(f"deubg_vis/{img['filename']}")
+                # im.save(f"debug_vis/{img['filename']}")
                 self.images.append(
                     {
                         'file_name': img['filename'],
@@ -227,7 +233,7 @@ class COCO:
 
     def json_save(self, ):
         # return annotations, images
-        with open(f'table_all_json_1224/table_line_1221_{self.flag}_v2.json', 'w') as f:
+        with open(f'table_all_json_1224/table_line_0224_{self.flag}_v2_all.json', 'w') as f:
             json.dump(dict(
                 images=self.images,
                 annotations=self.annotations,

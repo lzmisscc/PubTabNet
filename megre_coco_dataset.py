@@ -93,7 +93,10 @@ class COCO:
         self.images, self.annotations, self.categories = [], [], []
         self.categories += [
             dict(id=106, name='cell'),
-            # dict(id=1, name='col'),
+            dict(id=105, name='col'),
+            dict(id=100, name='row'),
+            dict(id=101, name='thead'),
+            dict(id=102, name='tbody'),
         ]
         self.flag = flag
         self.reader = jsonlines.open(
@@ -112,18 +115,28 @@ class COCO:
                 bboxes = [i['bbox'] for i in func(img) if 'bbox' in i]
                 if not gt_fliter(bboxes):
                     skip_nums += 1
-                    # print("skip_nums:", skip_nums)
-                    # print("id:", id)
                     continue
                 gt.set_description(f"total:{id},skip_nums:{skip_nums}")
-                # logging.info(f'{id}-->\t{img["filename"]}')
                 im = Image.open(os.path.join(
                     self.dataset_img_path, self.flag, img['filename']))
                 W, H = im.size
+
+
+                # if self.flag == 'train':
+                #     if len(self.images) >= 100:
+                #         break
+                # elif self.flag == 'val':
+                #     if len(self.images) >= 100:
+                #         break
+                # else:
+                #     if len(self.images) >= 1000:
+                #         break
+
+
+                # get cell
                 tmp = func(img)
                 if not tmp:
                     continue
-                # get cell
                 for box in tmp:
                     if 'bbox' not in box:
                         continue
@@ -205,12 +218,14 @@ class COCO:
                             'iscrowd': 0,
                             'image_id': id,
                             'bbox': point_xywh,
-                            'category_id': box.get('category_id', 100),
+                            'category_id': 100,
                             'id': bbox_id
                         },
                     )
                 # get head body
-                tmp = func(img)
+                from table2thead_tbody import polygon as thead_tbody
+
+                tmp = thead_tbody(img)
                 if not tmp:
                     continue
                 for box in tmp:
@@ -231,7 +246,7 @@ class COCO:
                             'iscrowd': 0,
                             'image_id': id,
                             'bbox': point_xywh,
-                            'category_id': box.get('category_id', 101),
+                            'category_id': box.get('category_id'),
                             'id': bbox_id
                         },
                     )
